@@ -1,0 +1,32 @@
+.stakingModalMain {
+    background-color: #363636;
+    border: 1px solid #525252 !important;
+  }
+  .stakingModalHeader {
+    background-color: #363636;
+    border-bottom: 1px solid #525252 !important;
+  }
+  .stakingModalContent {
+    background-color: #1d1d1d;
+  }
+  .addStakingModalBtn {
+    background-color: #259712!important;
+    background: #259712!important;
+  }
+  .stakingModalInput {
+      outline: none !important;
+      box-shadow: none !important;
+  }
+  .stakingModalInput:focus {
+      outline: none !important;
+      box-shadow: none !important;
+  }
+  .option{
+    background-color: #1d1d1d;
+  }
+  .select{
+    background-color: #1d1d1d;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  

@@ -1,0 +1,23 @@
+.tokenModalMain {
+  background-color: #363636;
+  border: 1px solid #525252 !important;
+}
+.tokenModalHeader {
+  background-color: #363636;
+  border-bottom: 1px solid #525252 !important;
+}
+.tokenModalContent {
+  background-color: #1d1d1d;
+}
+.addTokenModalBtn {
+  background-color: #259712!important;
+  background: #259712!important;
+}
+.tokenModalInput {
+    outline: none !important;
+    box-shadow: none !important;
+}
+.tokenModalInput:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}

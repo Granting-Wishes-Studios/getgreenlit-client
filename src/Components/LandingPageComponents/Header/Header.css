@@ -1,0 +1,38 @@
+.navbar_main{
+    background-color: #171717;
+}
+.launch-btn{
+    background-color: #259712;
+}
+.header{
+    background: linear-gradient(180deg, #171717 0%, #2B9E36 100%);
+    padding-left: 10rem;
+    padding-right: 10rem;
+}
+.main-header{
+    background: linear-gradient(180deg, #171717 0%, #2B9E36 100%);
+}
+@media screen and (max-width: 1536px) {
+    .header{
+        padding-left: 5rem;
+        padding-right: 5rem;
+    }
+}
+@media screen and (max-width: 1280px) {
+    .header{
+        padding-left: 0rem;
+        padding-right: 0rem;
+    }
+}
+
+@media screen and (min-width: 1720px) {
+    .header-heading{
+    font-size: 50px;
+    line-height: 60px;
+    }
+    .navbar_main{
+        padding-left: 18rem;
+        padding-right: 18rem;
+    }
+}
+

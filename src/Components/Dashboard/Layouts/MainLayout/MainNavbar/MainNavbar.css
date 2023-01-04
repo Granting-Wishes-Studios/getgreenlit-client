@@ -1,0 +1,42 @@
+.dashboardNavbar {
+  background-color: #0d0c0c;
+}
+
+.dropdown {
+  background-color: hsl(0deg 0% 0% / 10%);
+}
+
+.meta {
+  background-color: #f6851b;
+}
+.WalletConnect {
+  background-color: #024d9c;
+}
+.TrustWallet {
+  background-color: #3274bb;
+}
+.address-btn {
+  background: linear-gradient(90deg, #6825e7, #aa58b8);
+  min-width: 5rem;
+}
+.tpad {
+  color: #aa58b8;
+}
+.connectedBtn {
+  border: 2px solid #1f1d0b;
+}
+.start-btn{
+  color: #aa58b8;
+}
+.logout-layer {
+  padding-top : 0.3rem!important;
+  padding-bottom: 0.6rem!important;
+}
+.logout-design {
+  padding-left : 2.5rem!important;
+  padding-right : 2.5rem!important;
+}
+.wallet-letter {
+  margin-top: 5px;
+  margin-right: 8px;
+}

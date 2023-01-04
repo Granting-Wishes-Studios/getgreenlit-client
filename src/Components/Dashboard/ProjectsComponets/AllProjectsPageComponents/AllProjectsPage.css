@@ -1,0 +1,303 @@
+.CreateProjectHeader{
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size:cover;
+}
+.createProject_btn{
+    background-color: #006BCE!important;;
+}
+.createProject_back_btn{
+    background-color:inherit; 
+    border: 1px solid #fff;
+}
+.CreateProjectHeader_heading{
+    font-style: normal;
+    font-size: 28px;
+    line-height: 29px;
+    color: 'white';
+}
+
+.projectBadge{
+    box-sizing: border-box;
+    max-width: 120px;
+    padding: 1px 0;
+    padding-left: 4px;
+    background: #000000!important;;
+    border: 1px solid #666;
+    border-radius: 18px;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+    color: #FFFFFF;
+}
+.pb{
+    box-sizing: border-box;
+    border-radius: 100%; 
+    color: #FFFFFF;
+    font-size: 10px;
+    padding: 1.5px;
+    
+}
+
+.pb.pending, .pb.approved{
+    background:#D417C2!important;;
+    border: 1px solid #D417C2;
+    padding: 1.5px;
+}
+.pb.rejected{
+  background:#9B1919!important;;
+  border: 1px solid #9B1919;
+  padding: 1.5px;
+}
+.pb.in-progress{
+    background:#006BCE!important;;
+    border: 1px solid #006BCE;
+    padding: 1.5px;
+}
+.pb.released{
+    background:#128E17!important;;
+    border: 1px solid #128E17;
+    padding: 1.5px;
+}
+.pb.defunct{
+    background:#D96410!important;;
+    border: 1px solid #D96410;
+    padding: 1.5px;
+}
+
+.pb.arrow{
+    background:inherit;
+    border: 1px solid inherit;
+    padding: 1.5px;
+    font-size: 12px;
+}
+
+
+.spaceSettingFormFileInput {
+    background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='7' ry='7' stroke='%23A2A2A2FF' stroke-width='2' stroke-dasharray='12%2c 12' stroke-dashoffset='10' stroke-linecap='square'/%3e%3c/svg%3e");
+    border-radius: 7px;
+  }
+
+  .infoPanel{
+    border-radius: 10px;
+    padding: 12px;
+  }
+
+  .infoPanel.pending, .infoPanel.approved{
+    background: #000000!important;;
+    border: 1px solid #D417C2;
+    box-shadow: 0px 0px 4px #D417C2;
+  }
+  .infoPanel.rejected{
+    background: #000000!important;;
+    border: 1px solid #9B1919;
+    box-shadow: 0px 0px 4px #9B1919;
+  }
+  .infoPanel.in-progress{
+    background: #000000!important;;
+    border: 1px solid #006BCE;
+    box-shadow: 0px 0px 4px #006BCE;
+  }
+  .infoPanel.released{
+    background: #000000!important;;
+    border: 1px solid #128E17;
+    box-shadow: 0px 0px 4px #128E17;
+  }
+  .infoPanel.defunct{
+    background: #D96410!important;;
+    border: 1px solid #D96410;
+    box-shadow: 0px 0px 4px #D96410;
+  }
+  .iconPane{
+     color: #fff;
+     padding-right: 12px;
+  }
+  .icon.pending, .icon.approved{
+    border:1px solid #D417C2;
+    border-radius: 100%;
+    display: inline-block;
+    padding: 4px;
+}
+.icon.rejected{
+  border:1px solid #9B1919;
+  border-radius: 100%;
+  display: inline-block;
+  padding: 4px;
+}
+.icon.in-progress{
+    border:1px solid #006BCE;
+    border-radius: 100%;
+    display: inline-block;
+    padding: 4px;
+}
+.icon.released{
+    border:1px solid #128E17;
+    border-radius: 100%;
+    display: inline-block;
+    padding: 4px;
+}
+.icon.defunct{
+    border:1px solid #D96410;
+    border-radius: 100%;
+    display: inline-block;
+    padding: 4px;
+}
+  .infoPaneTitle{
+    font-style: normal;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 100%;
+    color: #FFFFFF;
+    padding-bottom: 6px;
+  }
+  .infoPaneMessage{
+    font-style: normal;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 17px;
+    color: #FFFFFF;
+  }
+  .projectDescription, .licensingInfo{
+    font-size: 13px;
+  }
+  .licensingTable{
+    font-size: 13px;
+    margin-top: 10px;
+  }
+  .licensingTable tr{
+    border-bottom: .5px solid #FFFFFF;
+  }
+  .licensingTable tr td{
+    padding: 5px 15px;
+    padding-left: 0;
+  }
+  .licensingTable .tr td{
+    padding: 15px;
+    padding-left: 0;
+    padding-right: 0;
+    border-top: none;
+  }
+  .projectBtn{
+    background-color: #006BCE!important;;
+  }
+
+  .projectBtn.successBtn{
+    background-color: #128E17!important;
+  }
+  .projectBtn.dangerBtn{
+    background-color:#9B1919!important;
+  }
+  .projectBtn.inverseBtn{
+    background-color:darkslategrey!important;
+  }
+  .projectBtn.defaultBtn{
+    background-color:#FFFFFF!important;
+    color: #000000;
+  }
+
+  .projectNav{
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .projectNav .projectNavHeading{
+    font-weight:800;
+  }
+  .projectNav .projectNavDescription{
+    font-size: 12px;
+  }
+  .socialLink{
+    display: block;
+    margin-top: 10px;
+  }
+  .socialLink li{
+    display: inline-block;
+    margin-right: 10px;
+  }
+  .socialLink li a{
+    display: block;
+    color: #FFFFFF;
+  }
+
+  .stakeToken:hover{
+    border: 1px solid #128E17;
+    border-radius: 5px;
+    filter: drop-shadow(0px 0px 3px #128E17);
+  }
+
+  .stakeToken.stakeTokenActive{
+    border: 2px solid #128E17;
+    filter: drop-shadow(0px 0px 4px #128E17);
+    border-radius: 5px;
+  }
+
+  .div{
+    line-height: 30px;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    padding-top: 9px;
+    padding-left: 7px; 
+    border-radius: 100%;   
+  }
+  .div.active{
+    background-color: #128E17!important;; 
+  }
+  .div span{
+    display: block;
+  }
+  .checked{
+    width: 16px;
+    height: 8px;
+    transform: rotate(-45deg);
+    border-top: 0;
+    border-right: 0;
+  }
+  .checked.active{
+    border: 4px solid #FFFFFF;
+    border-top: 0;
+    border-right: 0;
+  }
+  .license-intro{
+    margin: 0;
+    display: block;
+    padding-left: 15px;
+    text-align: justify;
+  }
+  .license-intro li{
+    list-style:disc;
+    margin-bottom: 6px;
+  }
+.dropdownMenu{
+  background: #1D1D1D!important;;
+  border: 1px solid #4A4A4A;
+  border-radius: 10px;
+  display: inline-block;
+  margin: 0;
+  padding: 15px 20px;
+}
+.dropdownMenu li{
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+.dropdownMenu li:last-child{
+  margin-bottom: 0;
+}
+ul[role='menu'] {
+    visibility: hidden;
+}
+
+ul[role='menu'].visible {
+    visibility: visible;
+}
+.stakingCard:hover{
+    border: 1px solid #128E17;
+    border-radius: 5px; 
+    cursor: pointer;
+}
+.stakingCard.active{
+  border: 1px solid #ACFF8E;
+  border-radius: 5px; 
+  filter: drop-shadow(0px 0px 3px #ACFF8E);
+}

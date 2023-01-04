@@ -1,0 +1,29 @@
+.beta{
+    background: linear-gradient(180deg, #792B9E 0%, #171717 100%);
+}
+
+.beta-btn{
+    background-color: #A615CA;
+}
+.footer{
+    background-color: #212121;
+}
+.beta-text {
+    font-family: 'Roc Grotesk';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 35px;
+/* identical to box height */
+    padding: 0 30px;
+    text-align: center;
+
+    color: #FFFFFF;
+}
+.social-link {
+    width: 29px;
+    cursor: pointer;
+}
+.margin-auto {
+    margin: auto;
+}

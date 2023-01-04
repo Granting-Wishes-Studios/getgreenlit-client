@@ -1,0 +1,66 @@
+.CreateSpaceHeader {
+  background: linear-gradient(180deg, #171717 0%, #2b9e36 100%);
+}
+
+.CreateSpaceHeader_heading {
+  font-style: normal;
+  font-weight: 300;
+  font-size: 24px;
+  line-height: 29px;
+  color: 'white';
+}
+
+.createSpace_btn {
+  background-color: #006bce;
+}
+.createSpace_btn:disabled,
+button[disabled]{
+  cursor: not-allowed;
+  background-color: #00a8ff !important;
+  color: #ccc;
+}
+.searchInput {
+  border: 1px solid #525252;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.join_btn {
+  background-color: #006bce;
+}
+
+.joined_btn {
+  background-color: #35393dcc;
+}
+
+.nerdsImg_bg {
+  background: linear-gradient(180deg, rgba(116, 111, 68, 0.5) 0%, #cebd21 100%);
+  border-radius: 12px 12px 0px 0px;
+}
+
+/* Create Space modal css */
+.modalMain {
+  background-color: #363636;
+  border: 1px solid #525252 !important;
+}
+.modalHeader {
+  background-color: #363636;
+  border-bottom: 1px solid #525252 !important;
+}
+.modalContent {
+  background-color: #1d1d1d;
+}
+.typeInput {
+  border: none;
+  border-bottom: 2px solid #525252 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.fileInput {
+  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='7' ry='7' stroke='%23A2A2A2FF' stroke-width='2' stroke-dasharray='12%2c 12' stroke-dashoffset='10' stroke-linecap='square'/%3e%3c/svg%3e");
+  border-radius: 7px;
+}
+.createSpaceModalBtn{
+  background-color: #259712!important;
+  background: #259712!important;
+}
