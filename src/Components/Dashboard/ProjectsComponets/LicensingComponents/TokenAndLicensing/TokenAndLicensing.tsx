@@ -1,6 +1,6 @@
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import React, { useEffect, useState } from 'react'
+import React, {useState } from 'react'
 import { AddLicenseModal } from './AddLicenseModal'
 import { AddTokenModal } from './AddTokenModal'
 import './TokenAndLicensing.css'
@@ -12,15 +12,14 @@ import { Loader } from '../../../../SubComponents/Loader';
 export const TokenAndLicensing = (props: any) => {
   const [showSummary, setshowSummary] = useState(false)
   const [showLicenseModal, setShowLicenseModal] = useState(false)
-  const [activeSummary, setActiveSummary] = useState<any>([])
+  const [request, setRequest] = useState('');
+  const [activeSummary, setActiveSummary] = useState<any>([]);
 
   const [activeState, setActiveState] = useState<any>(false)
  
-  
   const [loading, setLoading] = useState(false);
   const pathArray = window.location.pathname.split('/');
   const spaceId = pathArray[3];
-
 
   type FormValues = {
     licenseIntro: string,
@@ -33,10 +32,9 @@ export const TokenAndLicensing = (props: any) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const target = event.target
     const  value = target.value
+    
     setValues({ ...values, [target.name]: value })
   }
-  
-  
 
   const handleActiveSummary = (val: any) => {
     let d = activeSummary && activeSummary.find((ele: any) => ele === val)
@@ -89,14 +87,28 @@ export const TokenAndLicensing = (props: any) => {
 
   }
 
+  const handleShowTokenModal = (data:any) => {
+    props.setShowTokenModal(true)
+    data.action = 'edit-token';
+    setRequest(data); 
+  }
+
+  const handleShowLicenseModal = (data:any) => {
+    setShowLicenseModal(true)
+    data.action = 'edit-license';
+    setRequest(data);
+  }
+
 
   return (
+
     <div className="w-full md:w-5/6 px-5 py-10 sm:p-10 flex flex-col gap-y-10">
       <div>
         <div className="flex items-center justify-between">
           <h1 className="text-white text-2xl font-bold">Tokens</h1>
           <button
             onClick={() => {
+              setRequest('');
               props.setShowTokenModal(true)
             }}
             className=" text-white text-xs font-semibold px-5 py-1 rounded-full addToken-btn"
@@ -109,6 +121,7 @@ export const TokenAndLicensing = (props: any) => {
             setIsSaved={props.setIsSaved}
             setShowTokenModal={props.setShowTokenModal}
             showTokenModal={props.showTokenModal}
+            req={request}
           ></AddTokenModal>
         )}
         <p className="text-gray-200 text-xs mt-2">
@@ -116,7 +129,7 @@ export const TokenAndLicensing = (props: any) => {
           your IP.
         </p>
         {props.licenseTokenData.map((item:any, index:any) => (
-             <div key={index} className="w-full token-card rounded-sm py-5 px-4 sm:px-8 mt-3">
+             <div key={index} className="w-full token-card rounded-sm py-5 px-4 sm:px-8 mt-3 cursor-pointer" onClick={() => handleShowTokenModal(item)}>
              <h1 className="text-xl text-white font-semibold">
               {item.tokenName}
              </h1>
@@ -151,6 +164,7 @@ export const TokenAndLicensing = (props: any) => {
           <h1 className="text-white text-2xl font-bold">Licenses</h1>
           <button
             onClick={() => {
+              setRequest('');
               setShowLicenseModal(true)
             }}
             className=" text-white text-xs font-semibold px-5 py-1 rounded-full addToken-btn"
@@ -163,6 +177,7 @@ export const TokenAndLicensing = (props: any) => {
             setIsSaved={props.setIsSaved}
             showLicenseModal={showLicenseModal}
             setShowLicenseModal={setShowLicenseModal}
+            req={request}
           ></AddLicenseModal>
         }
         <p className="text-gray-200 text-xs mt-2">
@@ -172,7 +187,7 @@ export const TokenAndLicensing = (props: any) => {
 
         
          {props.licenseData.map((item:any, index:number) => (
-          <div key={index} className="w-full token-card rounded-sm py-5 px-4 sm:px-8 mt-3">
+          <div onClick={() => handleShowLicenseModal(item)} key={index} className="w-full token-card rounded-sm py-5 px-4 sm:px-8 mt-3 cursor-pointer">
           <h1 className="text-xl text-white font-semibold">
             {item.licenseName}
           </h1>

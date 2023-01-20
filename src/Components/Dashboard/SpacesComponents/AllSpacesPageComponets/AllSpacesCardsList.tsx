@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useContext } from 'react'
 import './AllSpacesPage.css'
 import { FaCheck, FaTimes } from 'react-icons/fa';
 import users_icon from './../../../../assets/users_icon.png'
 import { useNavigate } from 'react-router-dom'
 import { SpaceMetadata } from '../../../../Pages/Dashboard/SpacePage/SpaceNestedPages/AllSpaces'
-import axios from 'axios'
 import { AppContext } from '../../../../context/AppContext'
 import { notify } from '../../../Inc/Toastr';
 import { Loader } from '../../../SubComponents/Loader';
+import {joinOrLeaveSpace} from '../../../../networking/spaces'
+
 
 const config = require('../../../../config/config')[process.env.NODE_ENV || 'development'];
 
-const BASE_URL = config.base_url;
 const visibl = false;
 
 interface Props {
@@ -27,8 +27,9 @@ export const AllSpacesCardsList: React.FC<Props> = (props: Props) => {
   const [join, setJoin] = useState(props.spaces);
   const [isMember, setIsMember] = useState(props.spaces);
   const [hovering, setHovering] = useState(props.spaces);
+ 
 
-  const { isAuthenticated, authenticate, user, widget, setWidget, loadSpace, setNavHeadData } = useContext(AppContext);
+  const { isAuthenticated, authenticate, user, widget, setWidget } = useContext(AppContext);
 
 
   const handleMouseOver = (event: any, space_id:any) => {
@@ -59,42 +60,56 @@ export const AllSpacesCardsList: React.FC<Props> = (props: Props) => {
   const handleJoinOrLeave =  async (space_id: any, itemKey: any, event:any, linkTo:any,linkTitle:any, img:any) => {
 
     if(event.currentTarget.innerText === "Join"){
-      let response = null;
       setJoin(prev => [...prev].map(
         obj => (parseInt(obj.id) === parseInt(space_id) ? Object.assign(obj, { joining: true }) : obj)
      ))  
      if(!isAuthenticated){
       try{
-        response = await authenticate();
+        await authenticate().then(async (respond:any) => {
+          await joinOrLeaveSpace(space_id,respond, "join").then(res => {   
+            if(res.status){
+                notify('Space joined!', "success", 6000);
+                setIsMember(prev => [...prev].map(
+                  obj => (parseInt(obj.id) === parseInt(space_id) ? Object.assign(obj, { isMember: true }) : obj)
+               ))
+                setJoin(prev => [...prev].map(
+                 obj => (parseInt(obj.id) === parseInt(space_id) ? Object.assign(obj, { joining: false }) : obj)
+              ))
+      
+              // handle widget change
+              setWidget((prev:any) => [...prev, {linkTo:linkTo, linkTitle: linkTitle, img: img}])
+            }
+          })
+        })
+        
       }catch(error){
         setJoin(prev => [...prev].map(
           obj => (parseInt(obj.id) === parseInt(space_id) ? Object.assign(obj, { joining: false }) : obj)
        ))
       }
+    }else{
+      await joinOrLeaveSpace(space_id,user, "join").then(res => {   
+        if(res.status){
+            notify('Space joined!', "success", 6000);
+            setIsMember(prev => [...prev].map(
+              obj => (parseInt(obj.id) === parseInt(space_id) ? Object.assign(obj, { isMember: true }) : obj)
+           ))
+            setJoin(prev => [...prev].map(
+             obj => (parseInt(obj.id) === parseInt(space_id) ? Object.assign(obj, { joining: false }) : obj)
+          ))
+  
+          // handle widget change
+          setWidget((prev:any) => [...prev, {linkTo:linkTo, linkTitle: linkTitle, img: img}])
+        }
+      })
     } 
 
-    const user_id = user.userId?user.userId: response.userId;
-
-     axios.get(`${BASE_URL}/api/spaces/join`, {params: {'spaceId': space_id, 'userId': user_id}}).then(res => {
-      if(res.status){
-          notify('Space joined!', "success", 6000);
-          setIsMember(prev => [...prev].map(
-            obj => (parseInt(obj.id) === parseInt(space_id) ? Object.assign(obj, { isMember: true }) : obj)
-         ))
-          setJoin(prev => [...prev].map(
-           obj => (parseInt(obj.id) === parseInt(space_id) ? Object.assign(obj, { joining: false }) : obj)
-        ))
-
-        // handle widget change
-        setWidget((prev:any) => [...prev, {linkTo:linkTo, linkTitle: linkTitle, img: img}])
-      }
-    })
     
     }else{
       setJoin(prev => [...prev].map(
         obj => (parseInt(obj.id) === parseInt(space_id) ? Object.assign(obj, { joining: true }) : obj)
      ))   
-     axios.get(`${BASE_URL}/api/spaces/leave`, {params: {'spaceId': space_id, 'userId': user.userId}}).then(res => {
+     await joinOrLeaveSpace(space_id, user, "leave").then(res => {  
       if(res.status){
           notify('Space left!', "success", 6000);
           
@@ -114,6 +129,7 @@ export const AllSpacesCardsList: React.FC<Props> = (props: Props) => {
       
    
   }
+
 
   return (
     <div className="m-4 sm:m-10 xl:pr-20">
@@ -162,15 +178,22 @@ export const AllSpacesCardsList: React.FC<Props> = (props: Props) => {
               </div>
               </div>
                <div className="border-t border-gray-700 flex items-center justify-between p-4">
-                
-                <button  data-id={data.id} onMouseOver={(e) => handleMouseOver(e, data.id)} onMouseLeave={(e) => handleMouseLeave(e, data.id)} onClick={(event) => handleJoinOrLeave(data.id, event.currentTarget.dataset.id, event,data.id, data.name, data.avatarImg)} disabled={join[ind].joining}
+                {user.userId === data.userId ? (
+                   <button  data-id={data.id}
+                   className={`rounded-full text-white text-sm font-bold px-10 h-6 ${(data.isMember ? "joined_btn" : "join_btn")}`}
+                 >
+                   <span><FaCheck style={{display: 'inline-block', marginRight: 10, 'color': '#2ecc71'}}/>Joined</span>
+                 </button> 
+                ) : (
+                  <button  data-id={data.id} onMouseOver={(e) => handleMouseOver(e, data.id)} onMouseLeave={(e) => handleMouseLeave(e, data.id)} onClick={(event) => handleJoinOrLeave(data.id, event.currentTarget.dataset.id, event,data.id, data.name, data.avatarImg)} disabled={join[ind].joining}
                 
                   className={`rounded-full text-white text-sm font-bold px-10 h-6 ${(data.isMember ? "joined_btn" : "join_btn")}`}
                 >
                   {(data.isMember) ? hovering[ind].hovering ? <span><FaTimes style={{display: 'inline-block', marginRight: 10, 'color': '#e74c3c'}}/>Leave</span> : <span><FaCheck style={{display: 'inline-block', marginRight: 10, 'color': '#2ecc71'}}/>Joined</span> : 'Join'}
-                   
                    {join[ind].joining && (<Loader />)} 
                 </button> 
+                )}
+               
                  {visibl && (
                   <div className="flex items-center border border-gray-700 px-2 gap-x-1 py-1 rounded-full">
                   <img src={users_icon} alt="users_icon" className="w-4" />

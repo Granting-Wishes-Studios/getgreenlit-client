@@ -7,8 +7,6 @@ import { notify } from './../../../Inc/Toastr';
 
 import { AppContext } from './../../../../context/AppContext'
 
-import { toUserAuth } from '../../../../utils/utils';
-
 import { Loader } from '../../../SubComponents/Loader';
 import { useNavigate } from 'react-router-dom';
 
@@ -58,7 +56,7 @@ export const CreateSpaceModal: React.FC<Props> = (props) => {
     featuredUrl: null,
   })
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement> & React.ChangeEvent<HTMLTextAreaElement>) => {
     const target = event.target
     let value
 
@@ -91,7 +89,7 @@ export const CreateSpaceModal: React.FC<Props> = (props) => {
     }
 
     try{
-      await createSpace(request, toUserAuth(user)).then((data:any )=> {
+      await createSpace(request, user).then((data:any )=> {
         if(data.data.status){
           props.setShowModal(false);
           notify("Space created!", "success", 6000);
@@ -163,13 +161,13 @@ export const CreateSpaceModal: React.FC<Props> = (props) => {
                 <label className="text-white text-md font-bold">
                   IP Description
                 </label>
-                <input
-                  type="text"
+                <textarea
                   placeholder="Enter description..."
                   onChange={handleChange}
                   name='ipDescription'
-                  className="typeInput text-white bg-transparent text-sm px-0 shadow-none outlin-none"
-                />
+                  rows={3}
+                  className="text-white bg-transparent text-sm px-2 shadow-none outlin-none"
+                ></textarea>
               </div>
               <div className="flex flex-col gap-y-5">
                 <label className="text-white text-md font-bold">Links</label>

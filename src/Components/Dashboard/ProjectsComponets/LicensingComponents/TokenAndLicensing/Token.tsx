@@ -13,7 +13,7 @@ const handleSelect = (event: React.MouseEvent<HTMLElement>) => {
     }else{
         setToggleSelected(false)  
         setSelected(false) 
-        props.setStakedTokens((prev:any) => [...prev].filter(f => f.id != props.id));
+        props.setStakedTokens((prev:any) => [...prev].filter(token => token.id != props.id));
     }
 }
     return(

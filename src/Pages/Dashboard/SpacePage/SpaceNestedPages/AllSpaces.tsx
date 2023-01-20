@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { AllSpacesCardsList } from '../../../../Components/Dashboard/SpacesComponents/AllSpacesPageComponets/AllSpacesCardsList'
 import { CreateSpaceHeader } from '../../../../Components/Dashboard/SpacesComponents/AllSpacesPageComponets/CreateSpaceHeader'
 import { getSpaces } from '../../../../networking/spaces'
-import { toUserAuth } from '../../../../utils/utils'
 import { AppContext } from '../../../../context/AppContext';
 
 type SpaceMetadata = {
   id: string
+  userId: string,
   featuredImg: string
   avatarImg: string
   name: string
@@ -20,17 +20,18 @@ type SpaceMetadata = {
 const SpacesData: SpaceMetadata[] = []
 
 export const AllSpaces = () => {
-  const [showAlert, setShowAlert] = useState<any>(false)
+  const [setShowAlert] = useState<any>(false)
   const { isAuthenticated,  user, loadSpace, isCreated } = useContext(AppContext);
   const [spacesCards, setSpacesCards] = useState(SpacesData)
   
   useEffect(() => {
     setSpacesCards([])
-     getSpaces(toUserAuth(user)).then( res => {
+     getSpaces(user).then( res => {
       const spaces: SpaceMetadata[] = []
       res.forEach(async (space, ind) => {
       const spaceMeta: SpaceMetadata = {
         id: space.id,
+        userId: space.userId,
         name: space.title,
         featuredImg: space.featuredImgUrl,
         avatarImg: space.logoImgUrl,

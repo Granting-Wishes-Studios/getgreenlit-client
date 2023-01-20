@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { StakingTier } from '../../../../../Components/Dashboard/ProjectsComponets/LicensingComponents/StakingTier/StakingTier'
 import { AddTokenModal } from '../../../../../Components/Dashboard/ProjectsComponets/LicensingComponents/TokenAndLicensing/AddTokenModal'
 import { TokenAndLicensing } from '../../../../../Components/Dashboard/ProjectsComponets/LicensingComponents/TokenAndLicensing/TokenAndLicensing'

@@ -1,24 +1,12 @@
-import React, { Dispatch, SetStateAction, useEffect,useContext } from 'react'
-import { useParams } from 'react-router-dom'
+import { useEffect,useContext } from 'react'
 import MainSidebar from './MainSidebar/MainSidebar'
 import "./MainLayout.css"
 import { MainNavbar } from './MainNavbar/MainNavbar'
 import { Outlet } from 'react-router-dom'
-import toast, { Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 import { AppContext } from '../../../../context/AppContext';
 
-type NavHeadObject = {
-  title: string
-  img: string
-}
 
-interface Props {
-  navHeading: NavHeadObject
-  addr: any
-  setNestedSidebarShow:Dispatch<SetStateAction<Boolean>>
-  showMainSidebar: any
-  setShowMainSidebar:Dispatch<SetStateAction<Boolean>>
-}
 export const MainLayout = (props: any) => {
   
   const { user, navHeadData } = useContext(AppContext)

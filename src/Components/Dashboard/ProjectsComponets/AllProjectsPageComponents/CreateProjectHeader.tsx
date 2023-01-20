@@ -3,16 +3,16 @@ import './AllProjectsPage.css'
 import { CreateProjectModal } from './CreateProjectModal'
 import projectsIcon from './../../../../assets/projectsIcon.png'
 import { AppContext } from './../../../../context/AppContext'
-import { getSessionCookie } from '../../../../utils/session';
 import {FaAngleLeft} from 'react-icons/fa';
-import { getSpace, joinSpace, isSpaceMember } from '../../../../networking/spaces'
+import { getSpace, joinOrLeaveSpace, isSpaceMember } from '../../../../networking/spaces'
 import { Loader } from '../../../SubComponents/Loader';
 import { notify } from '../../../Inc/Toastr';
 import { useNavigate } from 'react-router-dom';
+import jwt_decode from 'jwt-decode';
 
 
 export const CreateProjectHeader = (props: any) => {
-  const {setWidget, navHeadData, isAuthenticated } = useContext(AppContext);
+  const {user, setWidget, navHeadData, isAuthenticated, authenticate} = useContext(AppContext);
   const [showIntroModal, setShowIntroModal] = useState<Boolean>(false);
   const [isMember, setIsMember] = useState<Boolean>(false);
   const [loading, setLoading] = useState<Boolean>(false);
@@ -23,9 +23,9 @@ export const CreateProjectHeader = (props: any) => {
 
   const bgImage = navHeadData.banner;
 
-  const userObj = getSessionCookie();
-  const userid = userObj.userId;
- 
+    const userid =   user.userId;
+  
+
   const pathArray = window.location.pathname.split('/');
   const spaceId = pathArray[3];
 
@@ -36,15 +36,26 @@ export const CreateProjectHeader = (props: any) => {
   }
   const handleJoinSpace = async () => {
     setLoading(true)
-      await joinSpace(spaceId, userid).then(res => {
-        if(res.status){
-          setIsMember(true)
-          notify('Space joined!', "success", 6000);
-        // handle widget change
-          setWidget((prev:any) => [...prev, {linkTo:res.space.id, linkTitle: res.space.title, img: res.space.logoImg}])
-          setLoading(false)
-        }
-      })
+    if(!isMember){     
+      try{
+        
+          await authenticate().then(async (response:any) => {
+            console.log('jdsjdfjkjkjkdf', response)  
+          await joinOrLeaveSpace(spaceId, response, 'join').then(res => {
+            if(res.status){
+              setIsMember(true)
+              notify('Space joined!', "success", 6000);
+            // handle widget change
+              setWidget((prev:any) => [...prev, {linkTo:res.space.id, linkTitle: res.space.title, img: res.space.logoImg}])
+              setLoading(false)
+            }
+          })
+        })
+      }catch(error){
+        console.log(error)
+        setLoading(false)
+      }
+    } 
   }
 
   const ifIsSpaceMember = async (userId:string, spaceId:string) => {
@@ -54,13 +65,15 @@ export const CreateProjectHeader = (props: any) => {
 }
 useEffect(() => {
   ifIsSpaceMember(userid, spaceId);    
-}, []);
+}, [isAuthenticated]);
 
 const getSpaceById = async (spaceId:string) => {
   await getSpace(spaceId).then(res => {
     setSpace(res)
   })
 }
+
+
 useEffect(() => {
   getSpaceById(spaceId);    
 }, [isAuthenticated]);
@@ -96,7 +109,8 @@ const handleShowIntroModal = () => {
                Join Space 
                { loading  && (<Loader />)} 
             </button>
-           )}
+           )
+           }
          
       </div>
       {showIntroModal && <CreateProjectModal space={space} showIntroModal={showIntroModal} setShowIntroModal={setShowIntroModal}></CreateProjectModal>}

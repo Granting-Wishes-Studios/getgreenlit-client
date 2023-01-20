@@ -17,37 +17,15 @@ import token2 from './../../../../assets/token2.png'
 import token3 from './../../../../assets/token3.png'
 import token4 from './../../../../assets/token1.png'
 
-import testPDF from './../../../../assets/test.pdf';
-
-import { getSessionCookie } from '../../../../utils/session';
-import {FaAngleDown, FaArrowDown, FaArrowUp, FaCheck, FaCog, FaInfo, FaMinus, FaTerminal } from 'react-icons/fa';
+import {FaAngleDown, FaArrowUp, FaCheck, FaCog, FaInfo, FaMinus } from 'react-icons/fa';
 import { isSpaceAdmin } from '../../../../networking/spaces'
-import {editProject, CreateProjectRequest, ProjectData, getProject, isProjectAdmin, setProjectStatus } from '../../../../networking/projects'
-import {stakeTokens, unStakeTokens, signALincense} from '../../../../networking/license'
+import {editProject, getProject, isProjectAdmin, setProjectStatus } from '../../../../networking/projects'
+import {stakeTokens, unStakeTokens, signALincense, getLicense} from '../../../../networking/license'
+
+import   { getDotETH }   from '../../../../utils/utils';
 
 import { Loader } from '../../../../Components/SubComponents/Loader';
 import { notify } from '../../../../Components/Inc/Toastr';
-import { json } from 'stream/consumers';
-
-
-type ProjectMetaData = {
-  id: string,
-  address: string
-  projectTitle: string,
-  projectDescription: string,
-  projectEmail: string,
-  projectCategory: string,
-  projectRelease: string,
-  twitter: string,
-  discord: string,
-  bannerImg: string,
-  featuredImg: string
-  status: string,
-  statusNote: string,
-  adminApproval: boolean,
-  staked: boolean,
-  signed: boolean
-}
 
 
 type FormValues = {
@@ -76,7 +54,7 @@ export const Project = () => {
   const path_array = window.location.pathname.split('/');
   const projectId = path_array[4];
 
-  const { isAuthenticated, isCreated } = useContext(AppContext);
+  const {user, isAuthenticated, isCreated } = useContext(AppContext);
   let navigate = useNavigate()
 
   const { buttonProps, itemProps, isOpen } = useDropdownMenu(3);
@@ -90,10 +68,12 @@ export const Project = () => {
   const [showModifyStatusModal, setShowModifyStatusModal] = useState<Boolean>(false);
   const [showEditProjectModal, setShowEditProjectModal] = useState<Boolean>(false);
   const [loading, setLoading] = useState<Boolean>(false);
+  const [itemLoaded, setItemLoaded] = useState(false);
   const [spaceAdmin, setSpaceAdmin] = useState<Boolean>(false);
   const [projectAdmin, setProjectAdmin] = useState<Boolean>(false);
   const [project, setProject] = useState<any>({});
   const [tier, setTier] = useState<any>({});
+  const [license, setLicense] = useState<any>({});
   const [statusNote, setStatusNote] = useState({statusNote: ''})
   const [status, setStatus]= useState(false)
   const [signee, setSignee]= useState('');
@@ -106,6 +86,8 @@ export const Project = () => {
   const [modifyStatus, setModifyStatus] = useState('');
   const [bannerImg, setBannerImg] = useState<null | any>(null)
   const [featuredImg, setFeaturedImg] = useState<null | any>(null)
+  const[owner, setOwner] = useState('');
+  const[authored, setAuthored] = useState('');
   const [values, setValues] = useState<FormValues>({
     projectTitle: '',
     projectDescription: '',
@@ -123,16 +105,9 @@ export const Project = () => {
     featuredUrl: '',
   })
 
-  const bgImage = navHeadData.banner;
+  const address = user.address;
 
-  const userObj = getSessionCookie();
-  const userid = userObj.userId;
-  const address = userObj.address;
-
-
-
-  
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement> & React.ChangeEvent<HTMLTextAreaElement>) => {
     const target = event.target
     let value
   
@@ -147,6 +122,8 @@ export const Project = () => {
     setValues({ ...values, [target.name]: value })
   }
   
+
+
   const handleSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const target = event.target
     const  value = target.value
@@ -190,7 +167,7 @@ export const Project = () => {
           break;
           case 'rejected':           
             statusHeading = "Project proposal rejected";
-            statusMessage =`spaceadmin.eth: “${note}”`;       
+            statusMessage =`${authored}: “${note}”`;       
           statusIcon = <FaMinus/>
           break;
         default:
@@ -231,7 +208,10 @@ export const Project = () => {
 const getProjectById = async (spaceId:string, projectId:string) => {
   await getProject(spaceId, projectId).then(res => {
     setProject(res) 
+    setOwner(getDotETH(res.address))
+    setAuthored(getDotETH(res.authored))
     setTier(res.tier);
+    setLicense(res.license)
     setStaked(res.staked);
     setSigned(res.signed);
     setModifyStatus(res.status);
@@ -255,12 +235,15 @@ const getProjectById = async (spaceId:string, projectId:string) => {
       featuredImg: null,
       featuredUrl: res.featuredImg
     }
+    
     setValues(prj);
   })
 }
+
+
 useEffect(() => {
   getProjectById(spaceId, projectId);    
-}, [status]);
+}, [isAuthenticated,status,showApprovalModal,showRejectModal,showStakingModal,showDeleteModal,showLicenseIntroModal,showLicenseModal,showModifyStatusModal,showEditProjectModal]);
 
 const ifIsSpaceAdmin = async (address:string, spaceId:string) => {
   await isSpaceAdmin(address, spaceId).then(res => {
@@ -269,7 +252,7 @@ const ifIsSpaceAdmin = async (address:string, spaceId:string) => {
 }
 useEffect(() => {
   ifIsSpaceAdmin(address, spaceId);    
-}, []);
+}, [isAuthenticated]);
 
 
 const ifIsProjectAdmin = async (address:string, projectId:string) => {
@@ -279,7 +262,11 @@ const ifIsProjectAdmin = async (address:string, projectId:string) => {
 }
 useEffect(() => {
   ifIsProjectAdmin(address, projectId);    
-}, []);
+}, [isAuthenticated]);
+
+
+
+
 
 const handleStatusChange = (event: React.ChangeEvent<HTMLInputElement>) => {
   const target = event.target
@@ -293,11 +280,13 @@ const handleShowApprovalModal = () => {
 
 const handleProjectStatus = async (event: React.FormEvent<HTMLFormElement>, status: string) => {
     event.preventDefault()
+    setStatus(false);
     setLoading(true)
      const projectRequest = {
       pid: projectId,
       sid: spaceId,
       status: status,
+      authored: user.address,
       statusNote: statusNote.statusNote
      }
     try{
@@ -334,6 +323,7 @@ const handleShowRejectModal = () => {
 }
 const handleShowStakingModal = () => {
   setShowStakingModal(true)
+  setStakedTokens([]);
 }
 const handleShowDeleteModal = () => {
   setShowDeleteModal(true)
@@ -342,9 +332,18 @@ const handleShowLicenseIntroModal = () => {
    setShowLicenseIntroModal(true)
 }
 
-const handleShowLicenseModal = () => {
+const handleShowLicenseModal = async () => {
+  setItemLoaded(false);
   setShowLicenseIntroModal(false)
   setShowLicenseModal(true)
+  
+  await getLicense(tier.licenseId).then(res => {
+    if(res.licenseFile){
+       setLicense(res)
+       setItemLoaded(true);
+    }   
+  })
+
 }
 
 const handleShowModifyStatusModal = () => {
@@ -355,8 +354,6 @@ const handleShowEditProjectModal = () => {
   setShowEditProjectModal(true)
 }
 
-
-const licenseFile = ""; // path to license file
 
 const handleCheck = (event: React.ChangeEvent<HTMLInputElement>) => {  
     const id = event.target.id; 
@@ -384,12 +381,13 @@ const handleCheck = (event: React.ChangeEvent<HTMLInputElement>) => {
 const handleSign = async (event: React.FormEvent<HTMLFormElement>) => {
    event.preventDefault();
     setLoading(true)
+    setStatus(false);
      const signRequest = {
       pid: projectId,
       address: address,
       signee: signee,
       sign: true,
-      licenseFile: licenseFile
+      licenseFile: license.licenseFile
      }
     try{
       await signALincense(signRequest).then(res => {
@@ -401,6 +399,7 @@ const handleSign = async (event: React.FormEvent<HTMLFormElement>) => {
               notify("License now active", "success", 6000)                        
            }else{
             setSigned(false)
+            setStatus(false);
             notify("Error occured!", "error", 6000) 
           }
          
@@ -411,6 +410,7 @@ const handleSign = async (event: React.FormEvent<HTMLFormElement>) => {
 }
 
 const handleSubmitStake = async ()  => {
+  setStatus(false);
   setLoading(true)
   const stakeRequest = {
    pid: projectId,
@@ -423,6 +423,7 @@ const handleSubmitStake = async ()  => {
            setStatus(true);
            setLoading(false)
            setShowStakingModal(false);
+           setStakedTokens([]);
            notify("Tokens sucessfully staked", "success", 6000)                        
         }else{
           setStatus(false);
@@ -445,6 +446,7 @@ const handleChangeStatus = () => {
 }
 
 const handleUnStake = async () => {
+  setStatus(false)
   setLoading(true)
   const stakeRequest = {
    pid: projectId
@@ -489,7 +491,7 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
   event.preventDefault()
   setLoading(true);
   let request;
-
+  setStatus(false);
    if(project.status == 'released'){
     request = {
       pid: projectId,
@@ -528,17 +530,20 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
   try{
     await editProject(request).then((data:any )=> {
       if(data.data.status){   
+        setStatus(true);
         setShowEditProjectModal(false);  
         notify("Project updated!", "success", 6000);
-        navigate(`/space/project/${spaceId}/${projectId}`)
+        //navigate(`/space/project/${spaceId}/${projectId}`)
         setLoading(false)
       }else{
         setLoading(false)
+        setStatus(false);
         notify('Something went wrong!', "error", 6000);
       }  
    })
   }catch(err:any){
     setLoading(false)
+    setStatus(false);
     notify(err.message, "error", 8000);
   }
 
@@ -551,6 +556,8 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
   {name: 'token4', token: token4}
   
  ];
+ 
+
   return (
     <div className="reative overflow-hidden">
       <CreateProjectHeader isDetailPage={true} project={project} showStatus={showStatusAndMessage}></CreateProjectHeader>
@@ -585,8 +592,8 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
                      </thead>
                     <tbody>
                      <tr className='tr' style={{borderTop: 'none', outline: 'none'}}>
-                           <td>boredgamer.eth</td>
-                           <td>{tier?.requiredToken}</td>
+                           <td>{owner}</td>
+                           <td>{project.stakedtokens != null ? (JSON.parse(project.stakedtokens?.tokens)).length : 0} {project.token?.tokenName}</td>
                            {(projectAdmin && project.signed || (project.status == 'released' || project.status == 'defunct')) && (
                              <td>{project.staked ? 'Not yet' : 'Yes'}</td>
                            )}
@@ -617,14 +624,16 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
                        </tr>
                     </tbody>
                    </table>
-                   {project.tokens != null && (
+                   {project.stakedtokens != null && (
                    <div className='mt-8 mb-5'>
-                       <h1 className='text-gray-200 w-1/2 sm:w-auto sm:text-sm font-bold'>Your tokens staked in this project:</h1>
+                       <h1 className='text-gray-200 w-1/2 sm:w-auto sm:text-sm font-bold'>
+                        {user.userId === project.userId? 'Your tokens ': 'Tokens '} 
+                         staked in this project:</h1>
                    </div>
                    )}
                    <div className='grid grid-cols-12 gap-y-5 xl:gap-y-0 sm:gap-x-5'>
-                     {project.tokens != null && (
-                        JSON.parse(project.tokens.tokens).map((item:any) => (
+                     {project.stakedtokens != null && (
+                        JSON.parse(project.stakedtokens.tokens).map((item:any) => (
                        <div className="text-center col-span-4 sm:col-span-3 xl:col-span-3 relative">
                          <div className="">
                             <img
@@ -644,14 +653,16 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         
        </div>
        <div className="col-span-12 sm:col-span-3 xl:col-span-3">
-         <div className='text-gray-200'>  
-         {(projectAdmin && project.signed && (modifyStatus == 'in-progress' || project.status == 'released') ) && (     
-         <div className="w-36 mb-4">
-          <button {...buttonProps} type="button" className="text-gray-200 text-sm font-semibold rounded-full w-full py-1 projectBtn pt-1 pb-1">Actions <FaAngleDown style={{display: 'inline-block', marginLeft: '3px'}} /></button>
-          <div className='relative'>
+         <div className='text-gray-200'> 
+         {isAuthenticated && (
+          <div>
+            {(projectAdmin && project.signed && (modifyStatus == 'in-progress' || project.status == 'released') ) && (     
+            <div className="w-36 mb-4">
+              <button {...buttonProps} type="button" className="text-gray-200 text-sm font-semibold rounded-full w-full py-1 projectBtn pt-1 pb-1">Actions <FaAngleDown style={{display: 'inline-block', marginLeft: '3px'}} /></button>
+            <div className='relative'>
             <ul className={ `dropdownMenu w-full absolute top-0 left-0 ${ isOpen ? 'visible' : '' }`} role='menu'>
                 {(projectAdmin && project.signed) && (
-                  <li><span {...itemProps[0]}>View license <FaArrowUp style={{display: 'inline-block', marginLeft: '2px',transform: 'rotate(45deg)'}}/></span></li>
+                  <li><a target="_blank" href={ license.licenseFile }><span {...itemProps[0]}>View license <FaArrowUp style={{display: 'inline-block', marginLeft: '2px',transform: 'rotate(45deg)'}}/></span></a></li>
                 )}
                 {(projectAdmin && project.status == 'released') && (
                   <li><span {...itemProps[1]} onClick={handleShowEditProjectModal}>Edit details</span></li>
@@ -670,22 +681,26 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
           <div><button type="button" onClick={handleShowRejectModal} className="text-gray-200 text-sm font-semibold rounded-full w-36 py-1 projectBtn dangerBtn mb-4">Reject project</button></div>
        </div>
         )}
-           {(project.projectAction && project.projectActionLink) && (
-           <div className="actionBtns">
-            <div><a type='button' target="_blank" href={project.projectActionLink} className="text-gray-200 text-sm font-semibold rounded-full w-36 py-1 projectBtn defaultBtn mb-4 capitalize text-center">{project.projectAction}</a></div>
-         </div> 
-           )}
+          
          {(projectAdmin && project.status == 'pending') && (
             <div className="actionBtns">
              <div><button onClick={handleShowEditProjectModal} type="button" className="text-gray-200 text-sm font-semibold rounded-full w-36 py-1 projectBtn mb-4">Edit details</button></div>
               <div><button onClick={handleShowDeleteModal} type="button" className="text-gray-200 text-sm font-semibold rounded-full w-36 py-1 projectBtn dangerBtn mb-4">Delete project</button></div>
            </div>
          )}
+         </div>
+         )}
+
+          {(project.projectAction && project.projectActionLink) && (
+           <div className="actionBtns">
+            <div><a type='button' target="_blank" href={project.projectActionLink} className="text-gray-200 text-sm font-semibold rounded-full w-36 py-1 projectBtn defaultBtn mb-4 capitalize text-center">{project.projectAction}</a></div>
+         </div> 
+           )}
          
           <div className='projectNav text-gray-200 mt-2 ml-1'>
            <div className='mb-4'>
                <h2 className='projectNavHeading'>PROJECT OWNER</h2>
-               <p className='projectNavDescription text-white'>lonamoney.eth</p>
+               <p className='projectNavDescription text-white'>{owner}</p>
            </div>
            <div className='mb-4'>
                <h2 className='projectNavHeading'>STAKING TIER</h2>
@@ -711,13 +726,19 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
            </div>
          </div>
          <hr className='w-36 mt-10'></hr>     
-         <ul className='flex flex-row socialLink'>
-             <li><a href=''>
+         <ul className='flex flex-row items-center socialLink'>
+
+         
+           {project.twitter !== null && (
+            <li><a target="_blank" rel="noreferrer" href={project.twitter}>
              <img src={twitterIcon} />
                </a></li>
-             <li><a href=''>
+          )}
+           {project.discord !== null && (
+            <li><a target="_blank" rel="noreferrer" href={project.discord}>
              <img src={discordIcon} />
-             </a></li>
+               </a></li>
+          )}
          </ul>        
        </div>
        </div>
@@ -870,8 +891,6 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
    </div>
    </BasicModal>
     )}
-
-
      {showStakingModal && (
      <BasicModal setShowModal={setShowStakingModal} showModal={showStakingModal}>
       <div className="tokenModalMain  w-full h-full overflow-hidden rounded-2xl mb-10 ">
@@ -888,6 +907,7 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
          onClick={() => {
           setShowStakingModal(false)
            setLoading(false)
+           setStakedTokens([]);
          }}
          className="text-gray-200 text-xs sm:text-sm font-bold"
        >
@@ -897,14 +917,14 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
      <div className="tokenModalContent h-full overflow-auto px-5 sm:px-8 py-8 flex flex-col gap-y-10">
      <div>     
      <p className='text-gray-200 text-xs mb-2' style={{fontSize: '12px'}}>
-         Select the tokens you would like to stake in <b>Garrett Walden: Origins.</b>
+         Select the tokens you would like to stake in <b>{project.projectTitle}.</b>
        </p>
        <div className='text-gray-200 text-xs leading-0'>Your tokens will be locked in the staking contract for the duration of your project’s development. They can only  <br/> be unstaked  once the project is marked as completed or defunct.</div>
        <p className='text-gray-200 font-bold text-sm mt-2 mb-4'>
-          <small>Required: 1 HIDDENONES</small>
+          <small className='capitalize'>Required: {project.tier.requiredStake} {project.token.tokenName}</small>
        </p>
-       <h1 className='text-gray-200 text-sm font-bold'>Hidden Ones</h1>
-       <p><small className='text-gray-200 text-xs font-bold text' style={{fontSize: '10px'}}>Selected: 1 HIDDENONES</small></p>
+       <h1 className='text-gray-200 text-xs font-bold capitalize'>{project.token.tokenName}</h1>
+       <p><small className='text-gray-200 text-xs font-bold text' style={{fontSize: '10px'}}>Selected: {stakedTokens.length} <span className='uppercase'>{project.token.tokenName}</span></small></p>
        <div className="">  
           <div className="grid grid-cols-12 gap-y-5 xl:gap-y-0 sm:gap-x-5 mt-8">
              
@@ -914,15 +934,16 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
          </div>
       </div>
       <div className='flex items-center gap-x-5 mt-6'>
-       <button onClick={handleSubmitStake} className='text-gray-200 font-semibold py-1 px-8 rounded-full addTokenModalBtn'>
-         Stake
-       { loading && 
-       (
-         <Loader />
+       {stakedTokens.length > 0 && (
+ <button onClick={handleSubmitStake} className='text-gray-200 font-semibold py-1 px-8 rounded-full addTokenModalBtn'>
+ Stake
+{ loading && 
+(
+ <Loader />
+)}
+</button>
        )}
-       </button>
-        
-        <span className='text-gray-200 font-semibold py-2 px-4 cursor-pointer'>Cancel</span>
+      
        
        </div>
      </div>
@@ -939,7 +960,7 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
          <p className="text-xs text-gray-200 font-semibold uppercase">
            {navHeadData.title}
          </p>
-         <h1 className="text-whgray-200ite w-1/2 sm:w-auto sm:text-lg font-bold mt-2">
+         <h1 className="text-white gray-200ite w-1/2 sm:w-auto sm:text-lg font-bold mt-2">
             Sign License project
          </h1>
        </div>
@@ -1012,9 +1033,11 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
        </button>
      </div>
      <div className="tokenModalContent h-full overflow-auto px-5 sm:px-8 py-8 flex flex-col gap-y-10">
-     <div>
+   
+      {!itemLoaded? (<Loader />): (
+        <div>
         <div style={{maxWidth: '650px', maxHeight: '400px', overflow: 'scroll', background: 'white'}}>
-        <embed src={testPDF} type="application/pdf" top-toolbar="0"   height="400px" width="620"></embed>
+          <embed src={license.licenseFile} type="application/pdf" top-toolbar="0"   height="400px" width="620"></embed>
         </div>     
      <form onSubmit={(e) => handleSign(e)}>
      <p className="text-gray-200 mb-6 mt-6">
@@ -1082,6 +1105,8 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
        </div>
      </form>
      </div>
+      )}
+   
      </div>
    </div>
    </BasicModal>
@@ -1244,14 +1269,14 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
                 <label className="text-white text-md font-bold">
                   Description
                 </label>
-                <input
-                  type="text"
-                  defaultValue={values.projectDescription}
+                <textarea
                   placeholder="Enter description..."
                   onChange={handleChange}
                   name='projectDescription'
-                  className="typeInput text-white bg-transparent text-sm px-0 shadow-none outlin-none"
-                />
+                  value={values.projectDescription}
+                  rows={3}
+                  className="text-white bg-transparent text-sm px-2 shadow-none outlin-none"
+                ></textarea>
               </div>
               <div className="flex flex-col gap-y-1">
                 <label className="text-white text-md font-bold">
@@ -1273,8 +1298,8 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
             <h1 className="text-white text-md font-semibold">
                Release Date
             </h1>            
-                <input
-                    type="text"
+                <input style={{}}
+                    type="date"
                     defaultValue={values.projectRelease}
                     placeholder="MM / DD / YY"
                     onChange={handleChange}

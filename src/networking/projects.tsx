@@ -1,7 +1,9 @@
-import { AxiosRequestHeaders } from 'axios'
 import axios from 'axios'
+import   { axiosJWTInterceptor }   from '../utils/utils';
 
 // TODO: use an environment variable to swap url out
+
+const axiosJWT = axiosJWTInterceptor;
 
 const config = require('../config/config')[process.env.NODE_ENV || 'development'];
 const BASE_URL = config.base_url;
@@ -19,10 +21,12 @@ type Project = {
     bannerImg: string,
     featuredImg: string
     status: string,
+    authored: string,
     statusNote: string,
     adminApproval: boolean,
     staked: boolean,
-    signed: boolean
+    signed: boolean,
+    tier: string
 }
 
 const ProjectData = {
@@ -56,21 +60,8 @@ type CreateProjectRequest = {
     featuredImg: File
 }
 
-type UserAuth = {
-    userId: string | null,
-    address: string | null,
-    sessionToken: string | null
-}
 
-const getAuthHeaders = (user: UserAuth): AxiosRequestHeaders  => {
-    return {      
-        userId: (!user.userId) ? '' : user.userId,
-        address: (!user.address) ? '' : user.address,
-        Authorization: (!user.sessionToken) ? '' : user.sessionToken
-    }
-}
-
-async function createProject (project: any, user: UserAuth, spaceId: string) {
+async function createProject (project: any, user: any, spaceId: string) {
 
     const formData = new FormData()
     formData.append('tid', project.tid);
@@ -83,8 +74,8 @@ async function createProject (project: any, user: UserAuth, spaceId: string) {
     formData.append('discord', project.discord)
     formData.append('bannerImg', project.bannerImg, project.bannerImg.name)
     formData.append('featuredImg', project.featuredImg, project.featuredImg.name);
-    formData.append('userId', user.userId!);
-    formData.append('address', user.address!);
+    formData.append('userId', user.userId);
+    formData.append('address', user.address);
     formData.append('spaceId', spaceId);
     formData.append('adminApproval', project.adminApproval);
     
@@ -93,7 +84,7 @@ async function createProject (project: any, user: UserAuth, spaceId: string) {
     // Display the values
 
     return new Promise((resolve) => {
-      axios.post(`${BASE_URL}/api/projects/create`, formData, {headers: {"Content-Type": "multipart/form-data"}})
+        axiosJWT.post(`${BASE_URL}/api/projects/create`, formData, {headers: {"Content-Type": "multipart/form-data"}})
     .then(res => {
         resolve(res)
     }).catch(err => {
@@ -136,7 +127,7 @@ async function editProject (project: any) {
     // Display the values
 
     return new Promise((resolve) => {
-      axios.post(`${BASE_URL}/api/projects/edit`, formData, {headers: {"Content-Type": "multipart/form-data"}})
+        axiosJWT.post(`${BASE_URL}/api/projects/edit`, formData, {headers: {"Content-Type": "multipart/form-data"}})
     .then(res => {
         resolve(res)
     }).catch(err => {
@@ -165,10 +156,12 @@ async function getProjects(spaceId:string): Promise<Array<Project>> {
                     bannerImg: projectResponse.bannerImg,
                     featuredImg: projectResponse.featuredImg,
                     status: projectResponse.status,
+                    authored:  projectResponse.authored,
                     statusNote: projectResponse.statusNote,
                     adminApproval: projectResponse.adminApproval,
                     staked: projectResponse.staked,
-                    signed: projectResponse.signed
+                    signed: projectResponse.signed,
+                    tier: projectResponse.tier,
                 }
                 projects.push(project)
             })
@@ -188,7 +181,6 @@ async function getProject(spaceId:string, projectId:string): Promise<any> {
             resolve(res.data)
         }).catch(err => {
             console.log(err)
-            //throw Error("Failed to get space")
             return Promise.reject(err);
         })
     })
@@ -211,10 +203,11 @@ async function setProjectStatus (project: any) {
         'pid': project.pid, 
         'sid': project.sid,
         'status': project.status,
+        'authored': project.authored,
         'statusNote': project.statusNote
     }
     return new Promise((resolve) => {
-      axios.post(`${BASE_URL}/api/projects/set-project-status`, formData)
+        axiosJWT.post(`${BASE_URL}/api/projects/set-project-status`, formData)
     .then((res) => {
         resolve(res.data.status)
     }).catch(err => {
@@ -224,4 +217,4 @@ async function setProjectStatus (project: any) {
 }
 
 export { createProject, editProject, getProjects, getProject, isProjectAdmin, setProjectStatus, ProjectData}
-export type { CreateProjectRequest, Project, UserAuth }
+export type { CreateProjectRequest, Project }
