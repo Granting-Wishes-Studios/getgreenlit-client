@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react'
 import { CreateStakingTierModal } from './CreateStakingTierModal'
 import './StakingTier.css'
 import quesCircleIcon from './../../../../../assets/quesCircleIcon.png'
+import Tooltip from "../../../../Inc/Tooltip";
+import {en} from "../../../../../utils/en";
 
 import { getStakingTier, setStakingTierStatus, getTokensAndLicenses } from '../../../../../networking/license'
 
 export const StakingTier = (props:any) => {
   const [showStakingModal, setShowStakingModal] = useState<any>(false)
   const [stakingData, setStakingData] = useState<any>([])
+  const [data, setData] = useState<any>(null)
   const [isSaved, setIsSaved] = useState(false);
   const [activeStakings, setActiveStakings] = useState<any>([1,2])
   const [tokensData, setTokensData] = useState([]);
@@ -25,7 +28,10 @@ export const StakingTier = (props:any) => {
     return res
   }
 
+
+
   const handleSwitch = (e:any ,val:any, id:string) => {
+    e.stopPropagation()
     if (e.target.checked) {
       setActiveStakings([...activeStakings, val])
       setStakingTierStatus(id, spaceId, true);
@@ -64,12 +70,19 @@ export const StakingTier = (props:any) => {
     getAllTokensAndLicenses(spaceId)
   }, [isSaved])
 
+
+const handleShowStakingTierModal = (data:any) => {
+  setData(data)
+  setShowStakingModal(true);
+}
+
   return (
     <div className="w-full md:w-5/6 px-5 py-10 sm:p-10">
       <div className="flex items-center justify-between">
         <h1 className="text-white text-2xl font-bold">Staking Tiers</h1>
         <button
           onClick={() => {
+            setData(null)
             setShowStakingModal(true)
           }}
           className=" text-white text-sm font-semibold px-5 py-1 rounded-full addToken-btn"
@@ -91,6 +104,7 @@ export const StakingTier = (props:any) => {
           showStakingModal={showStakingModal}
           setShowStakingModal={setShowStakingModal}
           setStakingData={setStakingData}
+          data={data}
         ></CreateStakingTierModal>
       )}
       {stakingData && stakingData.length > 0 ? (
@@ -111,13 +125,20 @@ export const StakingTier = (props:any) => {
                         <span className="slider round"></span>
                       </label>
                     </div>
+                   
+
+                    <Tooltip content={en('stake-tip')} direction="left">
                     <img
                       src={quesCircleIcon}
                       alt="quesCircleIcon"
                       className="w-4"
                     />
+                    </Tooltip>
+                  
+                    
                   </div>
                 </div>
+                <div onClick={(e)=>handleShowStakingTierModal(data)} className="cursor-pointer">
                 <p className="text-white text-sm mt-1">{data.tierSummary}</p>
                 <div className="mt-5 flex items-center gap-y-5 sm:gap-y-0 flex-wrap sm:flex-nowrap gap-x-10 lg:gap-x-5 xl:gap-x-10">
                   <div>
@@ -125,14 +146,15 @@ export const StakingTier = (props:any) => {
                       Required stake
                     </h3>
                     <p className="text-xs text-white mt-2">
-                      {data.required} HIDDENONES
+                    { data.requiredStake} { data.token?data.token.tokenName:''}
                     </p>
                   </div>
                   <div>
                     <h3 className="uppercase text-xs text-white font-bold">
                       License
                     </h3>
-                    <p className="text-xs text-white mt-2">{data.licenseToBeGranted}</p>
+                    
+                    <p className="text-xs text-white mt-2">{data.license?data.license.licenseName:''}</p>
                   </div>
                   <div>
                     <h3 className="uppercase text-xs text-white font-bold">
@@ -150,8 +172,9 @@ export const StakingTier = (props:any) => {
                     <h3 className="uppercase text-xs text-white font-bold">
                       Royalty
                     </h3>
-                    <p className="text-xs text-white mt-2">{data.royalty}</p>
+                    <p className="text-xs text-white mt-2">{data.royalty}%</p>
                   </div>
+                </div>
                 </div>
               </div>
             ))}

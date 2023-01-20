@@ -1,6 +1,5 @@
 import React, { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react'
 import './ProjectsSidebar.css'
-import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { NavLink } from 'react-router-dom'
@@ -8,6 +7,7 @@ import twittIcon from './../../../.././../assets/twittIcon.png'
 import discordIcon from './../../../.././../assets/discordIcon.png'
 import website from './../../../.././../assets/website.png'
 import { AppContext } from './../../../../../context/AppContext'
+import { getRoles } from '../../../../../networking/spaces'
 
 const config = require('../../../../../config/config')[process.env.NODE_ENV || 'development'];
 
@@ -17,27 +17,31 @@ interface Props {
   setShowProjectsSidebar: Dispatch<SetStateAction<Boolean>>
 }
 const ProjectsSidebar: React.FC<Props> = (props) => {
-  const BASE_URL = config.base_url;
   const { isAuthenticated, navHeadData, setNavHeadData, user } = useContext(AppContext);
   const [isAdmin, setIsAdmin] = useState(false);
   const pathArray = window.location.pathname.split('/');
   const spaceId = pathArray[3];
+
+  
+  const getSpaceRoles = async () => {
+    
+    await getRoles(spaceId, user.address).then((res:any) => {   
+      if(res.data.role! === "SPACE_ADMIN"){
+         setIsAdmin(true);
+      }else{
+       setIsAdmin(false);
+      }
+   setNavHeadData({
+     title: res.data.title, img:res.data.logoImg, id: res.data.id, banner: res.data.bannerImg, website: res.data.officialWebsite, twitter: res.data.twitter, discord: res.data.discord
+   })
+ })
+ .catch((err:any) => {
+     console.error('Error:', err);
+ });
+  }
+
   useEffect(() => {
-    axios
-        .get(`${BASE_URL}/api/spaces/role`, {params: {'spaceId': spaceId, address: user.address}})
-        .then((res) => {   
-             if(res.data.role! === "SPACE_ADMIN"){
-                setIsAdmin(true);
-             }else{
-              setIsAdmin(false);
-             }
-          setNavHeadData({
-            title: res.data.title, img:res.data.logoImg, id: res.data.id, banner: res.data.bannerImg, website: res.data.officialWebsite, twitter: res.data.twitter, discord: res.data.discord
-          })
-        })
-        .catch((err) => {
-            console.error('Error:', err);
-        });
+    getSpaceRoles();    
   }, [isAuthenticated]);
 
   return (
@@ -131,9 +135,15 @@ const ProjectsSidebar: React.FC<Props> = (props) => {
     
         <div className="mx-8 border-b border-gray-700"></div>
         <div className="px-8 flex items-center justify-center gap-x-3">
-        <a target="_blank" href={navHeadData.website}><img src={website} alt="discordIcon" className="w-6" /></a> 
-        <a target="_blank" href={navHeadData.twitter}><img src={twittIcon} alt="twittIcon" className="w-6" /></a>
-        <a target="_blank" href={navHeadData.discord}><img src={discordIcon} alt="discordIcon" className="w-6" /></a> 
+        {navHeadData.website !== '' && (
+           <a target="_blank" rel="noreferrer" href={navHeadData.website}><img src={website} alt="discordIcon" className="w-6" /></a> 
+        )}
+        {navHeadData.twitter !== '' && (
+           <a target="_blank" rel="noreferrer" href={navHeadData.twitter}><img src={twittIcon} alt="twittIcon" className="w-6" /></a>
+        )}
+         {navHeadData.discord !== '' && (
+           <a target="_blank" rel="noreferrer" href={navHeadData.discord}><img src={discordIcon} alt="discordIcon" className="w-6" /></a> 
+        )}
         </div>
       </div>
     </div>

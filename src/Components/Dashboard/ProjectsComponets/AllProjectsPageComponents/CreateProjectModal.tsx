@@ -1,13 +1,14 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 
 import { BasicModal } from '../../../SubComponents/Modal'
 import { createProject, CreateProjectRequest } from '../../../../networking/projects'
+import { getStakingTier } from '../../../../networking/license'
+
+
 import './AllProjectsPage.css'
 import { notify } from '../../../Inc/Toastr';
 
 import { AppContext } from '../../../../context/AppContext'
-
-import { toUserAuth } from '../../../../utils/utils';
 
 import { Loader } from '../../../SubComponents/Loader';
 import { useNavigate } from 'react-router-dom';
@@ -16,13 +17,13 @@ export const CreateProjectModal: React.FC<any> = (props) => {
 
 
   const { user, setisCreated} = useContext(AppContext);
-  const [showIntroModal, setShowIntroModal] = useState<Boolean>(props.showIntroModal);
   const [showStakingTierModal, setShowStakingTierModal] = useState<Boolean>(false);
   const [showNewProjectModal, setShowNewProjectModal] = useState<Boolean>(false);
   const [loading, setLoading] = useState(false);
   const [selectedTier, setSelectedTier] = useState('');
   const [selectedTierCategory, setSelectedTierCAtegory] = useState('');
   const [adminApproval, setAdminApproval] = useState(null);
+  const [stakingData, setStakingData] = useState<any>([])
   const navigate = useNavigate();
   
   const pathArray = window.location.pathname.split('/');
@@ -76,7 +77,7 @@ export const CreateProjectModal: React.FC<any> = (props) => {
     featuredUrl: null,
   })
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement> & React.ChangeEvent<HTMLTextAreaElement>) => {
     const target = event.target
     let value
 
@@ -115,7 +116,7 @@ export const CreateProjectModal: React.FC<any> = (props) => {
     }
 
     try{
-      await createProject(request, toUserAuth(user), spaceId).then((data:any )=> {
+      await createProject(request, user, spaceId).then((data:any )=> {
         if(data.data.status){
            props.setShowIntroModal(false)
            notify("Project created!", "success", 6000);
@@ -137,6 +138,14 @@ export const CreateProjectModal: React.FC<any> = (props) => {
   }
 
 
+  const getAllStakingTier = async (spaceId: string) => {
+    await getStakingTier(spaceId).then(res => {
+      setStakingData(res)
+    })
+   }
+   useEffect(() => {
+    getAllStakingTier(spaceId);
+  }, [])
 
   return (
     <>    
@@ -158,7 +167,7 @@ export const CreateProjectModal: React.FC<any> = (props) => {
           </div>
             <div className="modalContent h-full overflow-auto px-5 sm:px-8 py-5 flex flex-col gap-y-5">
               <div className="flex flex-col gap">
-                  <p className='text-gray-200 text-sm' style={{lineHeight: '20px', fontSize: '12px'}}>{props.space.ipDescription}</p>     
+                  <p className='text-gray-200 text-sm' style={{lineHeight: '20px', fontSize: '12px'}}>{props.space.licenseIntro ? props.space.licenseIntro?.intro : 'Default license intro here'}</p>     
               </div>
               <div className="flex justify-start">
                       <button onClick={handleShowStakingTierModal}
@@ -200,9 +209,7 @@ export const CreateProjectModal: React.FC<any> = (props) => {
              <small className='text-gray-200'>Select the tier that best suits your project. You won’t be prompted to stake tokens or sign your license yet.</small>
              {props.space.tiers && props.space.tiers.length > 0 ? (
         <div className="flex flex-col mt-5">
-          {props.space.tiers &&
-            props.space.tiers.length > 0 && 
-            props.space.tiers.map((data: any, ind: any) => (    
+          {stakingData.map((data: any, ind: any) => (    
               data.status && (
                 <div data-id={data.id}  data-name={data.adminApproval} data-value={data.projectCategory} onClick={handleSelectedTier} key={ind + 1} className="stakingCard px-6 py-4 rounded-sm mb-5" style={{background: '##0D0C0C', borderRadius: '5px'}}>
                 <div className="flex items-center justify-between">
@@ -215,14 +222,14 @@ export const CreateProjectModal: React.FC<any> = (props) => {
                       Required stake
                     </h3>
                     <p className="text-xs text-white mt-2" style={{fontSize: '11px'}}>
-                      {data.requiredToken}
+                      {data.requiredStake} {data.token.tokenName} 
                     </p>
                   </div>
                   <div>
                     <h3 className="uppercase text-xs text-white font-bold" style={{fontSize: '11px'}}>
                       License
                     </h3>
-                    <p className="text-xs text-white mt-2" style={{fontSize: '11px'}}>{data.licenseToBeGranted}</p>
+                    <p className="text-xs text-white mt-2" style={{fontSize: '11px'}}>{data.license.licenseName}</p>
                   </div>
                   <div>
                     <h3 className="uppercase text-xs text-white font-bold" style={{fontSize: '11px'}}>
@@ -301,13 +308,13 @@ export const CreateProjectModal: React.FC<any> = (props) => {
                 <label className="text-white text-md font-bold">
                   Description
                 </label>
-                <input
-                  type="text"
+                <textarea
                   placeholder="Enter description..."
                   onChange={handleChange}
                   name='projectDescription'
-                  className="typeInput text-white bg-transparent text-sm px-0 shadow-none outlin-none"
-                />
+                  rows={3}
+                  className="text-white bg-transparent text-sm px-2 shadow-none outlin-none"
+                ></textarea>
               </div>
               <div className="flex flex-col gap-y-1">
                 <label className="text-white text-md font-bold">

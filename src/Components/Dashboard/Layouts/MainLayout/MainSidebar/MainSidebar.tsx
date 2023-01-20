@@ -1,6 +1,5 @@
-import React, { Dispatch, SetStateAction, useState, useContext, useEffect } from 'react'
+import React, { Dispatch, SetStateAction, useState, useContext } from 'react'
 import { NavLink } from 'react-router-dom'
-import eye_circle from '../../../../../assets/eye_circle.png'
 import plus_circle from '../../../../../assets/plus_circle.png'
 import miniLogo from '../../../../../assets/miniLogo.png'
 import greenHalfDot from './../../../../../assets/greenHalfDot.png'
@@ -76,13 +75,13 @@ const spaceId = pathArray_[3];
           to="/greenlit-home"
           className="flex items-center justify-center py-1 text-white text-sm font-semibold relative"
         >
-        <div onClick={() => (setNavHeadData({title: '', img: ''}))} className={`p-1 rounded-full ${paramPath == 'greenlit-home' ? 'eyeImg' : '' }`}>
+        <div onClick={() => (setNavHeadData({title: '', img: ''}))} className={`p-1 rounded-full ${paramPath === 'greenlit-home' ? 'eyeImg' : '' }`}>
           <FontAwesomeIcon
               icon={faHome}
               className="text-white text-lg w-5 h-5 rounded-full p-1"
             />    
         </div>
-        {paramPath == 'greenlit-home' && (
+        {paramPath === 'greenlit-home' && (
            <img
            src={greenHalfDot}
            alt="greenHalfDot"
@@ -94,7 +93,7 @@ const spaceId = pathArray_[3];
         { isAuthenticated &&   (       
              widget.map((item:any, ind:any) => ( 
               <div key={item.linkTitle + ind} onClick={(e) => handleLink(item.linkTo)} className="flex items-center justify-center py-1 text-white text-sm font-semibold relative cursor-pointer">
-                <div className={`p-1 rounded-full ${spaceId == item.linkTo ? 'eyeImg' : '' }`}>
+                <div className={`p-1 rounded-full ${spaceId === item.linkTo ? 'eyeImg' : '' }`}>
                    <img src={item.img} alt="eye_circle" className="w-9 h-9 rounded-full" />
                 </div>
                 <img
@@ -102,7 +101,7 @@ const spaceId = pathArray_[3];
                   alt="greenHalfDot"
                   className="w-1/12 absolute right-0"
                 />
-                 {spaceId == item.linkTo && (
+                 {spaceId === item.linkTo && (
                   <img
                   src={greenHalfDot}
                   alt="greenHalfDot"

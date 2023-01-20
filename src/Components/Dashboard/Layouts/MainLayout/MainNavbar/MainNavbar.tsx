@@ -1,13 +1,11 @@
-import React, { Dispatch, SetStateAction, useState, useEffect, useContext } from 'react'
+import React, { Dispatch, SetStateAction, useState, useContext } from 'react'
 import { NavLink } from 'react-router-dom'
 import './MainNavbar.css'
 import logoName from './../../../../../assets/logoName.png'
-import eye_circle from './../../../../../assets/eye_circle.png'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars } from '@fortawesome/free-solid-svg-icons'
 import { AppContext } from './../../../../../context/AppContext'
 import { Loader } from '../../../../SubComponents/Loader';
-import { getSessionCookie } from '../../../../../utils/session';
 
 type NavHeadObject = {
   title: string
@@ -21,21 +19,16 @@ interface Props {
 
 export const MainNavbar: React.FC<Props> = (props) => {
   const [showDropdown, setShowDropdown] = useState<any>(false)
-  const { authenticate, isAuthenticated, user, logout } = useContext(AppContext);
+  const {user, authenticate, isAuthenticated, logout } = useContext(AppContext);
   const [loading, setLoading] = useState(false);
 
-
-  const userObj = getSessionCookie();
-  const profileImg = userObj.profileImage;
+  const profileImg = user.profileImage;
 
   const onConnectWallet = async () => {
      setLoading(true);
      await authenticate()
       setLoading(false);    
   }
-
-  const paramsEncoded = props.navHeading.title.replace(/\s+/g, '-');
-
   const onDisconnectWallet = async () => {
     setLoading(true);
     await logout()

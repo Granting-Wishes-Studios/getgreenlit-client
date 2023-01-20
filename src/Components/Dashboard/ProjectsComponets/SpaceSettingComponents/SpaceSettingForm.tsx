@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom'
 import './SpaceSettingForm.css'
 import {  FaTrash } from 'react-icons/fa';
 import { AppContext } from './../../../../context/AppContext'
-import { toUserAuth } from '../../../../utils/utils';
 import { notify } from './../../../Inc/Toastr';
 import { Loader } from '../../../SubComponents/Loader';
 
@@ -17,7 +16,7 @@ export const SpaceSettingForm = () => {
   const [bannerImg, setBannerImg] = useState<null | any>(null)
   const [featuredImg, setFeaturedImg] = useState<null | any>(null)
 
-  const [spaceTitle, setSpaceTitle] = useState<any>('')
+  const [spaceTitle] = useState<any>('')
 
   const { user, setisCreated, setNavHeadData, setWidget} = useContext(AppContext);
   const [loading, setLoading] = useState(false);
@@ -100,7 +99,7 @@ useEffect(() => {
 }, [])
 
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement> & React.ChangeEvent<HTMLTextAreaElement>) => {
     const target = event.target
     let value
 
@@ -155,7 +154,7 @@ useEffect(() => {
     }
 
     try{
-      await updateSpace(request, adminFormValues, toUserAuth(user)).then((data:any) => {
+      await updateSpace(request, adminFormValues, user).then((data:any) => {
         if(data.data.status){
 
           notify("Space updated!", "success", 6000);          
@@ -236,13 +235,14 @@ const removeFormFields = async (i:number, roleId:string|null) => {
               <label className="text-white text-lg font-bold">
                 IP Description
               </label>
-              <input defaultValue={values.ipDescription}
-                type="text"
+              <textarea
                 name='ipDescription'
                 onChange={handleChange}
                 placeholder="Enter description..."
-                className="spaceSettingFormTypeInput text-white bg-transparent text-sm px-0 shadow-none outlin-none"
-              />
+                rows={3}
+                value={values.ipDescription}
+                className="text-white bg-transparent text-sm px-2 shadow-none outlin-none"
+              ></textarea>
             </div>
             <div className="flex flex-col gap-y-5">
               <label className="text-white text-lg font-bold">Links</label>
@@ -465,13 +465,14 @@ const removeFormFields = async (i:number, roleId:string|null) => {
               Use this open text box to add resources for users to learn more
               about your space’s IP.
             </span>
-            <input defaultValue={values.resources?values.resources:''}
-              type="text"
+            <textarea
               onChange={handleChange}
               name='resources'
               placeholder="Enter text..."
-              className="adminKeyInput border border-gray-400 rounded-md text-white w-full bg-transparent text-sm px-4 py-3"
-            />
+              rows={3}
+              value={values.resources?values.resources:''}
+              className="border border-gray-400 rounded-md text-white w-full bg-transparent text-sm px-2 py-3"
+            ></textarea>
           </div>
         </div>
         <div className="flex justify-start p-10">
